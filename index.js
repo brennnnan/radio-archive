@@ -7,52 +7,53 @@ writeStreams.push(0)
 writeStreams.push(0)
 var counter = 0;
 
-// URL to a known ICY stream
+// URL to dublab stream
 var url = 'http://14123.live.streamtheworld.com/SAM01AAC269_SC';
-var theDate = new Date();
 
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
+function makeFileName() {
+	d = new Date();
+	var timeString = d.getMonth()+"-"+d.getDate()+"-"+d.getFullYear()+"_"+d.getHours()+"'"+d.getMinutes()+"'"+d.getSeconds()+'.mp3';
+	return timeString
 }
+
 
 // connect to the remote stream
 		icy.get(url, function (res) {
-			a = theDate.getTime();
-			// gets time for recording start
-			var d = new Date();
-			var timeString = d.getMonth()+"-"+d.getDate()+"-"+d.getFullYear()+"_"+d.getHours()+"'"+d.getMinutes()+"'"+d.getSeconds()+'.mp3';
-			var wstream = fs.createWriteStream(timeString);
-			console.log('Starting new mp3 file');
-			writeStreams[0] = wstream
-			counter++;
 			
+			
+			var wstream = fs.createWriteStream(makeFileName());
+			console.log('Starting new mp3 file');
+			writeStreams[0] = wstream;
+			counter++;
 			
 			// log the HTTP response headers
 			//console.error(res.headers);
-
+			
+			// gets time for recording start
+			var theDate = new Date();
+			startTime = theDate.getTime();
+			
+			// starts piping stream to mp3 file
 			res.pipe(wstream);
 			
 			setInterval(function() {
 				theDate = new Date();
 				
-				// If stream has been recording for 2 hours
-				if(theDate.getTime()-a > 3600000) {
+				// If stream has been recording for an hour
+				if(theDate.getTime()-a > 3500000) {
+					// reset a to 
 					a = theDate.getTime();
 					// create new write stream
-					timeString = theDate.getMonth()+"-"+theDate.getDate()+"-"+theDate.getFullYear()+"_"+theDate.getHours()+"'"+theDate.getMinutes()+"'"+theDate.getSeconds()+'.mp3';
-					writeStreams[counter%2] = fs.createWriteStream(timeString);
-					
+					writeStreams[counter%2] = fs.createWriteStream(makeFileName());
+
+					// start writing to new file and ends old one
 					res.pipe(writeStreams[counter%2]);
 					res.unpipe(writeStreams[(counter-1)%2])
 					console.log('Starting new mp3 file');
+					counter++;
 					}
-			}, 500000);
+			}, 600000);
 				
 				
 			
