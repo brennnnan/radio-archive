@@ -1,7 +1,7 @@
 // Setup
 var icy = require('icy');
 var lame = require('lame');
-var Speaker = require('speaker');
+
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
@@ -75,9 +75,8 @@ function manageFiles(filePath) {
 				theDate = new Date();
 				
 				// If its a new hour, make new file
-				if(theDate.getMinutes == 0) {
-				//if(theDate.getTime() - startTime > 2000) {
-					// reset a to 
+				if(theDate.getMinutes() == 0 && (theDate.getHours()%2) == 0) {
+	
 					startTime = theDate.getTime();
 					// create new write stream
 					fileName = makeFileName()
